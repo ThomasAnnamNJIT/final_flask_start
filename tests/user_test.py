@@ -23,5 +23,5 @@ def test_edit_user(client):
     assert response.status_code == 200
 
     user = User.query.filter_by(username="test@gmail.com").first()
-    assert user.password == password
+    assert user.password == user.check_password(password)
     assert user.about == about
