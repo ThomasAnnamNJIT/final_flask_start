@@ -1,5 +1,6 @@
 from flask import Blueprint, render_template, abort, redirect, url_for
 from flask_login import login_required, current_user
+from werkzeug.security import generate_password_hash
 
 from app import db
 from app.auth.decorators import admin_required
@@ -19,7 +20,7 @@ def edit():
     if user:
         if edit_form.validate_on_submit():
             user.username = edit_form.username.data
-            user.password = edit_form.password.data
+            user.password = generate_password_hash(edit_form.password.data)
             user.about = edit_form.about.data
             db.session.add(user)
             db.session.commit()

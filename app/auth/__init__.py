@@ -1,4 +1,6 @@
+import logging
 import os
+from datetime import datetime
 
 from flask import url_for, redirect, Blueprint, render_template, current_app, request
 from flask_login import login_required, current_user, logout_user, login_user
@@ -23,8 +25,8 @@ def index():
 def login():
     login_form = LoginForm()
     if login_form.validate_on_submit():
-        user = User.query.filter_by(username=login_form.username.data, password=login_form.password.data).first()
-        if user:
+        user = User.query.filter_by(username=login_form.username.data).first()
+        if user and user.check_password(login_form.password.data):
             user.authenticated = True
             db.session.add(user)
             db.session.commit()
@@ -38,6 +40,8 @@ def login():
 @auth.route("/dashboard", methods=["GET", "POST"])
 @login_required
 def dashboard():
+    logger = logging.getLogger("myApp")
+
     page = request.args.get("page", 1, type=int)
 
     upload_form = UploadForm()
@@ -51,7 +55,7 @@ def dashboard():
             transactions = read_csv(filepath)
 
             total = user.total
-            for transaction in transactions:
+            for i, transaction in enumerate(transactions):
                 transaction = Transaction(amount=transaction["amount"],
                                           transaction_type=transaction["transaction_type"])
                 float_amount = float(transaction.amount)
@@ -63,9 +67,7 @@ def dashboard():
 
                 transaction.user = current_user
                 db.session.add(transaction)
-            user.total = total
-            db.session.add(user)
-            db.session.commit()
+                logger.info(f"Adding in Transaction {i+1} at {datetime.utcnow()} for user {user.username}")
 
         user = User.query.filter_by(id=current_user.id).first()
         pagination = Transaction.query.filter_by(user_id=user.id).paginate(page, per_page=10)
