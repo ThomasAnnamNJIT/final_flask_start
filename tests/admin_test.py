@@ -40,3 +40,26 @@ def test_admin_can_delete(client):
 
     users = User.query.all()
     assert len(users) == 1
+
+
+def test_admin_cannot_delete_itself(client):
+    """This makes a request to ensure an admin user cannot be deleted"""
+
+    response = client.post("/register",
+                           data=dict(username="test1@gmail.com", password="test",
+                                     about="This is just a test for about me!!!"))
+    # Create a newly registered user
+    assert response.status_code == 302
+
+    # Newly registered user is able to log in
+    client.post("/login", data=dict(username="test1@gmail.com", password="test"))
+    # Log into the admin page
+    response = client.get("/admin")
+    assert response.status_code == 200
+
+    users = User.query.all()
+    assert len(users)
+
+    response = client.post("/users/delete",
+                           data=dict(username="test1@gmail.com"))
+    assert response.status_code == 400

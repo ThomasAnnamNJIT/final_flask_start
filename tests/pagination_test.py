@@ -37,3 +37,24 @@ def test_transaction_pagination(client):
     pagination = Transaction.query.filter_by(user_id=user.id).paginate(1, 5)
     assert len(pagination.items) == 5
     assert pagination.has_next is True
+
+
+def test_admin_pagination(client):
+    """This makes a request to admin pagination"""
+    for i in range(1, 11):
+        response = client.post("/register",
+                               data=dict(username=f"test{i}@gmail.com", password="test",
+                                         about="This is just a test for about me!!!"))
+        # Create a newly registered user
+        assert response.status_code == 302
+
+    pagination = User.query.paginate(1, 5)
+    assert len(pagination.items) == 5
+    assert pagination.has_next is True
+
+    pagination = User.query.paginate(2, 5)
+    assert len(pagination.items) == 5
+    assert pagination.has_next is False
+
+    pagination = User.query.paginate(3, 5, error_out=False)
+    assert len(pagination.items) == 0
