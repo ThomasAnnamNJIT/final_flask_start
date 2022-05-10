@@ -39,7 +39,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v3
         with:
-          images: thomasannam/is601-project-three
+          images: thomasannam/is601-project-four
 
       - name: Build and push
         uses: docker/build-push-action@v2
