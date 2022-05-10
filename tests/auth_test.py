@@ -63,7 +63,7 @@ def test_user_can_access_dashboard(client):
 
 
 def test_file_upload(client):
-    """This makes a request to upload a file and properly stores within user and song tables"""
+    """This makes a request to upload a file and properly stores within user and transaction table"""
 
     client.post("/register",
                 data=dict(username="test@gmail.com", password="test",
@@ -133,6 +133,41 @@ def test_csv_file_cannot_be_uploaded(client):
         client.post("/dashboard",
                     data={"file": my_file},
                     content_type="multipart/form-data")
+
+        user = User.query.filter_by(username="test@gmail.com").first()
+        assert user
+        assert len(user.transactions) == 0
+
+
+def test_empty_file_upload(client):
+    """This makes a request to upload a transaction file that is empty"""
+
+    client.post("/register",
+                data=dict(username="test@gmail.com", password="test",
+                          about="This is just a test for about me!!!"))
+    # Newly registered user is able to log in
+    client.post("/login", data=dict(username="test@gmail.com", password="test"))
+
+    # New user can access the dashboard
+    response = client.get("/dashboard")
+    assert response.status_code == 200
+
+    root = os.path.dirname(os.path.abspath(__file__))
+    csv_path = os.path.join(root, "data/empty.csv")
+
+    with open(csv_path, "rb") as csv_file:
+        my_file = FileStorage(
+            stream=csv_file,
+            filename="empty.csv",
+            content_type="text/csv"
+        )
+
+        response = client.post("/dashboard",
+                               data={"file": my_file},
+                               content_type="multipart/form-data")
+        assert response.status_code == 200
+
+        assert len(User.query.all())
 
         user = User.query.filter_by(username="test@gmail.com").first()
         assert user
