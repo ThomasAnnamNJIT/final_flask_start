@@ -44,7 +44,7 @@ def test_user_registration(client):
     # User has not logged in yet
     assert user.authenticated is False
     assert user.about == "This is just a test for about me!!!"
-    assert user.check_password(user.password)
+    assert user.check_password("test")
 
 
 def test_user_can_access_dashboard(client):
