@@ -178,3 +178,39 @@ def test_empty_file_upload(client):
         user = User.query.filter_by(username="test@gmail.com").first()
         assert user
         assert len(user.transactions) == 0
+
+
+def test_corrupt_file_upload(client):
+    """This makes a request to upload a transaction
+    file that is corrupted (i.e. bad inputs)"""
+
+    client.post("/register",
+                data=dict(username="test@gmail.com", password="test",
+                          about="This is just a test for about me!!!"))
+    # Newly registered user is able to log in
+    client.post("/login", data=dict(username="test@gmail.com", password="test"))
+
+    # New user can access the dashboard
+    response = client.get("/dashboard")
+    assert response.status_code == 200
+
+    root = os.path.dirname(os.path.abspath(__file__))
+    csv_path = os.path.join(root, "data/corrupt_data.csv")
+
+    with open(csv_path, "rb") as csv_file:
+        my_file = FileStorage(
+            stream=csv_file,
+            filename="corrupt_data.csv",
+            content_type="text/csv"
+        )
+
+        with pytest.raises(Exception):
+            client.post("/dashboard",
+                        data={"file": my_file},
+                        content_type="multipart/form-data")
+
+        assert len(User.query.all())
+
+        user = User.query.filter_by(username="test@gmail.com").first()
+        assert user
+        assert len(user.transactions) == 0
