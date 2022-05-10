@@ -31,10 +31,10 @@ class User(UserMixin, db.Model):
     total = db.Column(db.Float, server_default="0.0", nullable=False)
     transactions = db.relationship("Transaction", back_populates="user", cascade="all, delete")
 
-    def __init__(self, email, password):
-        self.email = email
+    def __init__(self, username, password, about):
+        self.username = username
         self.password = password
-        self.registered_on = datetime.utcnow()
+        self.about = about
 
     def is_authenticated(self):
         return self.authenticated
