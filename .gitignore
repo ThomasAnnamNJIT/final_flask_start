@@ -6,3 +6,13 @@
 __pycache__
 .coverage
 .bash_history
+.env
+logs
+uploads
+database
+bin/
+include/
+lib/
+uploads
+logs
+calc.egg-info
