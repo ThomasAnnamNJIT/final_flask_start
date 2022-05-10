@@ -1,6 +1,7 @@
 """This test the auth page"""
 import os
 
+import pytest
 from flask_login import current_user
 from werkzeug.datastructures import FileStorage
 
