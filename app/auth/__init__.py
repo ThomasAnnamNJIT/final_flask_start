@@ -69,6 +69,10 @@ def dashboard():
                 db.session.add(transaction)
                 logger.info(f"Adding in Transaction {i+1} at {datetime.utcnow()} for user {user.username}")
 
+            user.total = total
+            db.session.add(user)
+            db.session.commit()
+
         user = User.query.filter_by(id=current_user.id).first()
         pagination = Transaction.query.filter_by(user_id=user.id).paginate(page, per_page=10)
         transactions = pagination.items
